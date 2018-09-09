@@ -10,6 +10,7 @@ import java.util.Scanner;
 public class Crud {
 
 	private static RandomAccessFile arq;
+	private static RandomAccessFile index;
 
 	public static void main(String[] args) {
 		Scanner input = new Scanner(System.in);	
@@ -17,6 +18,7 @@ public class Crud {
 
 		System.out.println("Bem-vindo ao CRUD de filmes!");
 		try{	
+			index = new RandomAccessFile("index.db","rw");
 			arq = new RandomAccessFile("filme.db","rw");
 
 			int id;
@@ -32,6 +34,7 @@ public class Crud {
 
 				switch(choice) {
 					case 0:
+						index.close();
 						arq.close();
 						System.out.println("Obrigado por utilizar o CRUD de filmes!");
 						break;
@@ -83,7 +86,7 @@ public class Crud {
 	 * @param id do filme a ser gravado
 	 * */
 	public static void create(Filme filme, int id){
-		try {
+		try { 
 			if(id == -1) {
 				if(arq.length() == 0) {
 					id = 0;
@@ -96,6 +99,9 @@ public class Crud {
 			arq.seek(0);
 			arq.writeInt(id);
 			arq.seek(arq.length());
+			index.seek(searchIndex(id));
+			index.writeInt(id);
+			index.writeLong(arq.getFilePointer());
 			filme.setId(id);
 			filme.writeObject(arq);
 		} catch(Exception e) {
@@ -107,9 +113,9 @@ public class Crud {
 	 * Deleta o filme do arquivo(alterando a lapide
 	 * @param id do filme a ser deletado
 	 * */
-	public static void delete(int id){
+	public static void delete(int id) {
 		long pointArq = searchPointer(id);
-		if(pointArq !=0){
+		if(pointArq !=-1){
 
 			try{
 				arq.seek(pointArq);
@@ -129,7 +135,7 @@ public class Crud {
 	public static void update(int id){
 		long pointArq = searchPointer(id);
 
-		if(pointArq !=0){
+		if(pointArq !=-1){
 
 			try{
 				arq.seek(pointArq);
@@ -151,30 +157,33 @@ public class Crud {
 	 * */
 	public static void read(int id){
 		long pointerArq = searchPointer(id);
+		System.out.println(pointerArq);
 
-		if(pointerArq != 0){
+		if(pointerArq != -1){
 			try{
 				arq.seek(pointerArq);
-				arq.skipBytes(2);
+				if(arq.readChar() != '*') {
+					int tam = arq.readShort();
 
-				int tam = arq.readShort();
+					byte[] registro = new byte[tam];
 
-				byte[] registro = new byte[tam];
+					for(short i = 0 ; i < tam; i++)
+						registro[i] = arq.readByte();
 
-				for(short i = 0 ; i < tam; i++)
-					registro[i] = arq.readByte();
+					Filme filme  = new Filme();
 
-				Filme filme  = new Filme();
-
-				filme.setByteArray(registro);
-				System.out.println(filme.toString());
+					filme.setByteArray(registro);
+					System.out.println(filme.toString());
+				} else {
+					System.out.println("Filme não encontrado!");
+				}
 
 			}catch(IOException e ){
 				e.printStackTrace();
 			}
-		}
-		else
-			System.out.println("Filme não encontrado!");		
+		} else {
+			System.out.println("Filme não encontrado!");
+		} 		
 	}//end read()
 
 	/*
@@ -182,42 +191,25 @@ public class Crud {
 	 * @param id do registro cujo ponteiro eh desejado
 	 * @return ponteiro do registro desejado
 	 * */
-	private static long searchPointer(int id){
-
-		long pointArq = 0;
-		long tamArquivo;
+	private static long searchPointer(int id) {
+		int idLido;
+		long address = -1;
 		boolean continuar = true;
 
-		try{
-			tamArquivo = arq.length();
-
-			if(tamArquivo == 0)
-				System.out.println("ERRO : Arquivo vazio!");
-			else{
-				arq.seek(4);
-				pointArq = arq.getFilePointer();
-				while(continuar & pointArq < tamArquivo){
-
-					char lapide = arq.readChar();
-
-					short tamRegistro = arq.readShort();
-
-					if(lapide != '*' && arq.readInt() == id )
-						continuar = false;
-					else{
-						arq.seek(pointArq);
-						arq.skipBytes(tamRegistro+4);
-						pointArq = arq.getFilePointer();
-
-					}	
+		try {
+			index.seek(0);
+			while((index.getFilePointer() < index.length()) && continuar) {
+				idLido = index.readInt();
+				address = index.readLong();
+				if(id == idLido) {
+					continuar = false;
 				}
 			}	
-		}
-		catch(IOException e){
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return continuar?0:pointArq;
 
+		return address;
 	}//end searchPointer()
 
 	/*
@@ -259,4 +251,26 @@ public class Crud {
 		}	
 		return filme; 
 	}//end criarObjetoFilme()
+
+	private static long searchIndex(int id) {
+		long address = -1;
+		int idLido =1;
+		boolean continuar = true;
+		try {
+			address = index.length();
+			index.seek(0);
+			while((index.getFilePointer() < index.length()) && continuar) {
+				long aux = index.getFilePointer();
+				idLido = index.readInt();
+				index.readLong();
+				if(idLido == id) {
+					continuar = false;
+					address = aux;
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return address;
+	}
 }//end Crud
