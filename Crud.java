@@ -98,7 +98,7 @@ public class Crud {
 								choice = -1;
 								break;
 							case 1:
-								createGen();
+								createGen(-1);
 								break;
 							case 2:
 								updateGen();
@@ -126,22 +126,23 @@ public class Crud {
 		System.out.println("Obrigado por utilizar o CRUD!");
 	}//end main()
 
-	public static void createGen() {
+	public static void createGen(int idGen) {
 		try {
 			input = new Scanner(System.in);
 			System.out.print("Digite o Genero: ");
 			String genero = input.nextLine();
-			int idGen;
 
 			if(searchGen(genero)) {
 				System.out.println("Genero ja cadastrado!");
 			} else {
-				if(gen.length() == 0) {
-					idGen = 0;
-				} else {
-					gen.seek(0);
-					idGen = gen.readInt();
-					idGen++;
+				if(idGen == -1) {
+					if(gen.length() == 0) {
+						idGen = 0;
+					} else {
+						gen.seek(0);
+						idGen = gen.readInt();
+						idGen++;
+					}
 				}
 				gen.seek(0);
 				gen.writeInt(idGen);
@@ -157,6 +158,27 @@ public class Crud {
 
 	public static void updateGen() {
 		input = new Scanner(System.in);
+		boolean continuar = true;
+		System.out.print("Digite o ID do genero a ser alterado: ");
+		int idGen = input.nextInt();
+
+		try {
+			gen.seek(4);
+			while(gen.getFilePointer() < gen.length() && continuar) {
+				if(idGen == gen.readInt()) {
+					continuar = false;
+					gen.writeChar('*');	
+				} else {
+					gen.readChar();
+					gen.readUTF();
+				}
+			}
+			if(!continuar) {
+				createGen(idGen);		
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 
 	}
 
@@ -177,6 +199,7 @@ public class Crud {
 			gen.seek(4);
 			while(gen.getFilePointer() < gen.length() && !resp) {
 				gen.readInt();
+				gen.readChar();
 				if(genero == gen.readUTF()) {
 					resp = true;
 				}
