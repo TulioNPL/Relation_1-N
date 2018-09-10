@@ -11,74 +11,182 @@ public class Crud {
 
 	private static RandomAccessFile arq;
 	private static RandomAccessFile index;
+	private static RandomAccessFile gen;
+	private static Scanner input;
+	private static int genID;
 
 	public static void main(String[] args) {
-		Scanner input = new Scanner(System.in);	
+		input = new Scanner(System.in);	
 		int choice = -1;
 
 		System.out.println("Bem-vindo ao CRUD de filmes!");
 		try{	
 			index = new RandomAccessFile("index.db","rw");
 			arq = new RandomAccessFile("filme.db","rw");
+			gen = new RandomAccessFile("generos.db","rw");
 
 			int id;
 
-			while(choice != 0) { 
-				System.out.println("-----------------------------------------------\nMenu:\n"+
+			while(choice != 0) {
+				System.out.println("---------------------------------\nMain Menu:\n"+
 						"0 - Sair;\n"+
-						"1 - Incluir filme;\n"+
-						"2 - Alterar filme;\n"+
-						"3 - Excluir filme;\n"+
-						"4 - Consultar filme;\n-----------------------------------------------");
+						"1 - Menu de Filmes;\n"+
+						"2 - Menu de Generos\n------------------------------------");
 				choice = input.nextInt();
+				if(choice == 1) {
+					while(choice != -1) { 
+						System.out.println("-----------------------------------------------\nMenu de filmes:\n"+
+								"0 - Voltar;\n"+
+								"1 - Incluir filme;\n"+
+								"2 - Alterar filme;\n"+
+								"3 - Excluir filme;\n"+
+								"4 - Consultar filme;\n-----------------------------------------------");
+						choice = input.nextInt();
 
-				switch(choice) {
-					case 0:
-						index.close();
-						arq.close();
-						System.out.println("Obrigado por utilizar o CRUD de filmes!");
-						break;
-					case 1:
-						Filme filme = criarObjetoFilme();
-						System.out.println("CRIADO O FILME = "+filme.getTitulo());
+						switch(choice) {
+							case 0:
+								choice = -1;
+								break;
+							case 1:
+								Filme filme = criarObjetoFilme();
+								System.out.println("CRIADO O FILME = "+filme.getTitulo());
 
-						if(filme != null) {
-							create(filme,-1);
+								if(filme != null) {
+									create(filme,-1);
+								}
+
+								break;
+							case 2:	
+								System.out.println("Insira o ID do filme a ser alterado: ");
+								id = input.nextInt();
+								System.out.print("Deseja confirmar a alteração? Insira (1): ");
+								if(input.nextByte() == 1) {
+									update(id);
+								}
+								break;
+							case 3:
+								System.out.print("Insira o ID do filme a ser excluído: ");
+								id = input.nextInt();
+								System.out.print("Deseja confirmar a exclusão? Insira (1): ");
+
+								if(input.nextByte() == 1) {
+									delete(id);
+								}
+
+								break;
+							case 4:
+								System.out.print("Insira o ID do filme a ser pesquisado: ");
+								id = input.nextInt();
+								read(id);
+								break;
+							default:
+								System.out.println("Opção inválida!");
+								break;
 						}
+					}
+				} else if (choice == 2) {
+					while (choice != -1) {
+						System.out.println("-------------------------------------\nMenu de Generos:\n"+
+								"0 - Voltar;\n"+
+								"1 - Inserir Genero;\n"+
+								"2 - Alterar Genero;\n"+
+								"3 - Excluir Genero;\n"+
+								"4 - Consultar Genero;\n-----------------------------------");	
+						choice = input.nextInt();
+						switch(choice) {
+							case 0 : 
+								choice = -1;
+								break;
+							case 1:
+								createGen();
+								break;
+							case 2:
+								updateGen();
+								break;
+							case 3: 
+								deleteGen();
+								break;
+							case 4:
+								readGen();
+								break;
 
-						break;
-					case 2:	
-						System.out.println("Insira o ID do filme a ser alterado: ");
-						id = input.nextInt();
-						System.out.print("Deseja confirmar a alteração? Insira (1): ");
-						if(input.nextByte() == 1) {
-							update(id);
 						}
-						break;
-					case 3:
-						System.out.print("Insira o ID do filme a ser excluído: ");
-						id = input.nextInt();
-						System.out.print("Deseja confirmar a exclusão? Insira (1): ");
+					}
+				} else {
+					index.close();
+					arq.close();
+					gen.close();
 
-						if(input.nextByte() == 1) {
-							delete(id);
-						}
-
-						break;
-					case 4:
-						System.out.print("Insira o ID do filme a ser pesquisado: ");
-						id = input.nextInt();
-						read(id);
-						break;
-					default:
-						System.out.println("Opção inválida!");
-						break;
 				}
 			}
 		} catch (IOException ioException ) {
 			ioException.printStackTrace();
 		}
+
+		System.out.println("Obrigado por utilizar o CRUD!");
 	}//end main()
+
+	public static void createGen() {
+		try {
+			input = new Scanner(System.in);
+			System.out.print("Digite o Genero: ");
+			String genero = input.nextLine();
+			int idGen;
+
+			if(searchGen(genero)) {
+				System.out.println("Genero ja cadastrado!");
+			} else {
+				if(gen.length() == 0) {
+					idGen = 0;
+				} else {
+					gen.seek(0);
+					idGen = gen.readInt();
+					idGen++;
+				}
+				gen.seek(0);
+				gen.writeInt(idGen);
+				gen.seek(gen.length());
+				gen.writeInt(idGen);
+				gen.writeChar(' ');
+				gen.writeUTF(genero);	
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void updateGen() {
+		input = new Scanner(System.in);
+
+	}
+
+	public static void deleteGen() {
+		input = new Scanner(System.in);
+
+	}
+
+	public static void readGen(){
+		input = new Scanner(System.in);
+
+	}
+
+	public static boolean searchGen(String genero) {
+		boolean resp = false;
+
+		try {
+			gen.seek(4);
+			while(gen.getFilePointer() < gen.length() && !resp) {
+				gen.readInt();
+				if(genero == gen.readUTF()) {
+					resp = true;
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		return resp;
+	}
 
 	/*
 	 * Escreve o filme no arquivo
@@ -218,7 +326,7 @@ public class Crud {
 	 * */
 	public static Filme criarObjetoFilme(){
 		Scanner input = new Scanner(System.in);
-		String titulo,tituloOriginal,pais,diretor,sinopse;
+		String titulo,tituloOriginal,pais,diretor,sinopse,genero;
 		short ano;
 		short min;
 
@@ -245,9 +353,12 @@ public class Crud {
 		System.out.print("Minutos filme: ");
 		min = input.nextShort();
 
+		System.out.print("Genero do filme: ");
+		genero = input.nextLine();
+
 		System.out.print("Insira 1 para confirma inclusão ou 0 para cancelar: ");
 		if(input.nextByte() == 1) {
-			filme = new Filme(titulo,tituloOriginal,pais,ano,min,diretor,sinopse);
+			filme = new Filme(titulo,tituloOriginal,pais,ano,min,diretor,sinopse,genero);
 		}	
 		return filme; 
 	}//end criarObjetoFilme()
