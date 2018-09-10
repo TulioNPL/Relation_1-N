@@ -12,6 +12,7 @@ public class Filme {
 	private short duracao;
 	private String diretor;
 	private String sinopse;
+	private String idGenero;
 
 	public Filme() {
 	}//end Filme()
@@ -27,7 +28,7 @@ public class Filme {
 	 * @param sinopse oficial do filme
 	 * @return Instancia de filme criada com parametros selecionados
 	 * */
-	public Filme(String titulo, String tituloOriginal, String pais, short ano, short duracao, String diretor, String sinopse) {
+	public Filme(String titulo, String tituloOriginal, String pais, short ano, short duracao, String diretor, String sinopse, String idGenero) {
 		this.titulo = titulo;
 		this.tituloOriginal = tituloOriginal;
 		this.pais = pais;
@@ -35,6 +36,7 @@ public class Filme {
 		this.duracao = duracao;
 		this.diretor = diretor;
 		this.sinopse = sinopse;
+		this.idGenero = idGenero;
 	}//end Filme()
 
 	public void setTitulo(String titulo) {
@@ -69,6 +71,10 @@ public class Filme {
 		this.sinopse = sinopse;
 	}
 
+	public void setIDGenero(String idGenero) {
+		this.idGenero = idGenero;
+	}
+
 	public String getTitulo () {
 		return this.titulo;			
 	}
@@ -101,6 +107,10 @@ public class Filme {
 		return this.id;
 	}
 
+	public String getIDGenero() {
+		return this.idGenero;
+	}
+
 	/*
 	 * Retorna um vetor de bytes(registro) do Filme corrente
 	 * @return vetor de bytes do registro
@@ -118,6 +128,7 @@ public class Filme {
 		saida.writeShort(this.duracao);
 		saida.writeUTF(this.diretor);
 		saida.writeUTF(this.sinopse);
+		saida.writeUTF(this.idGenero);
 		
 
 		return dados.toByteArray();
@@ -140,6 +151,7 @@ public class Filme {
 		this.duracao = entrada.readShort();
 		this.diretor = entrada.readUTF();
 		this.sinopse = entrada.readUTF();
+		this.idGenero = entrada.readUTF();
 		
 	}//end setByteArray()
 
@@ -167,7 +179,8 @@ public class Filme {
 			"\n* Duracao: "+this.duracao+
 			"\n* Ano: "+this.ano+
 			"\n* Sinopse: "+this.sinopse+
-			"\n* ID: "+this.id+"\n*****/";
+			"\n* ID: "+this.id+
+			"\n* Gênero: "+this.idGenero+"\n*****/";
 
 	}//end toString()
 }//end Filme
