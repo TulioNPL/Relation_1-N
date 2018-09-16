@@ -12,7 +12,7 @@ public class Filme {
 	private short duracao;
 	private String diretor;
 	private String sinopse;
-	private String idGenero;
+	private int idGenero;
 
 	public Filme() {
 	}//end Filme()
@@ -28,7 +28,7 @@ public class Filme {
 	 * @param sinopse oficial do filme
 	 * @return Instancia de filme criada com parametros selecionados
 	 * */
-	public Filme(String titulo, String tituloOriginal, String pais, short ano, short duracao, String diretor, String sinopse, String idGenero) {
+	public Filme(String titulo, String tituloOriginal, String pais, short ano, short duracao, String diretor, String sinopse, int idGenero) {
 		this.titulo = titulo;
 		this.tituloOriginal = tituloOriginal;
 		this.pais = pais;
@@ -71,7 +71,7 @@ public class Filme {
 		this.sinopse = sinopse;
 	}
 
-	public void setIDGenero(String idGenero) {
+	public void setIDGenero(int idGenero) {
 		this.idGenero = idGenero;
 	}
 
@@ -107,7 +107,7 @@ public class Filme {
 		return this.id;
 	}
 
-	public String getIDGenero() {
+	public int getIDGenero() {
 		return this.idGenero;
 	}
 
@@ -128,7 +128,7 @@ public class Filme {
 		saida.writeShort(this.duracao);
 		saida.writeUTF(this.diretor);
 		saida.writeUTF(this.sinopse);
-		saida.writeUTF(this.idGenero);
+		saida.writeInt(this.idGenero);
 		
 
 		return dados.toByteArray();
@@ -151,7 +151,7 @@ public class Filme {
 		this.duracao = entrada.readShort();
 		this.diretor = entrada.readUTF();
 		this.sinopse = entrada.readUTF();
-		this.idGenero = entrada.readUTF();
+		this.idGenero = entrada.readInt();
 		
 	}//end setByteArray()
 
