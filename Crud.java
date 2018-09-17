@@ -167,8 +167,8 @@ public class Crud {
 	public static void updateGen() {
 		input = new Scanner(System.in);
 		boolean continuar = true;
-		System.out.print("Digite o genero a ser alterado: ");
-		String idGen = input.nextLine();
+		System.out.print("Digite o ID do genero a ser alterado: ");
+		int idGen = input.nextInt();
 		int id = -1;
 		long ponteiro = 0;
 
@@ -178,7 +178,7 @@ public class Crud {
 				int aux = gen.readInt();
 				ponteiro = gen.getFilePointer();
 				char auxC = gen.readChar();
-				if(idGen.equals(gen.readUTF()) && auxC != '*') {
+				if(idGen == aux && auxC != '*') {
 					continuar = false;
 					id = aux;
 				}	
@@ -233,26 +233,25 @@ public class Crud {
 	 * */
 	public static void readGen(){
 		input = new Scanner(System.in);
-		System.out.print("Digite o genero que deseja procurar: ");
-		String idGen = input.nextLine();
+		System.out.print("Digite o ID genero que deseja procurar: ");
+		int idGen = input.nextInt();
 		boolean continuar = true;
 		int idLido = 0;
-		String genLido;
+		String genLido = "";
 
 		try {
 			gen.seek(4);
-
 			while(gen.getFilePointer() < gen.length() && continuar) {
 				idLido = gen.readInt();
 				char aux = gen.readChar();
 				genLido = gen.readUTF();
-				if(genLido.equals(idGen) && aux != '*')  {
+				if(idGen == idLido && aux != '*')  {
 					continuar = false;
 				}
 			}
 
 			if(!continuar) {
-				System.out.println("O genero procurado esta cadastrado com o ID: " + idLido);
+				System.out.println("O genero procurado eh: " + genLido);
 				listaFilmes(idLido);
 			} else {
 				System.out.println("Genero nao encontrado!");
@@ -533,15 +532,6 @@ public class Crud {
 		System.out.print("Titulo Original: ");
 		tituloOriginal = input.nextLine();
 
-		while(genero.equals("")) {
-			System.out.print("Digite o ID do genero: ");
-			idGen = input.nextInt();
-			genero = searchGen(idGen);
-			if(genero.equals("")) {
-				System.out.println("ID inexistente!");
-			}
-		}
-
 		System.out.print("Pais de origem: ");
 		pais = input.nextLine();
 
@@ -556,6 +546,16 @@ public class Crud {
 
 		System.out.print("Minutos filme: ");
 		min = input.nextShort();
+		
+		while(genero.equals("")) {
+			System.out.print("Digite o ID do genero: ");
+			idGen = input.nextInt();
+			genero = searchGen(idGen);
+			if(genero.equals("")) {
+				System.out.println("ID inexistente!");
+			}
+		}
+
 
 		System.out.print("Insira 1 para confirma inclusão ou 0 para cancelar: ");
 		if(input.nextByte() == 1) {
