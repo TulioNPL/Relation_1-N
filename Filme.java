@@ -1,4 +1,5 @@
-/* Autores: Tulio N. Polido Lopes, Joao Victor da Silva, Gustavo Lescowicz Kotarsky, Temistocles Altivo Schwartz 
+/*:
+ * Autores: Tulio N. Polido Lopes, Joao Victor da Silva, Gustavo Lescowicz Kotarsky, Temistocles Altivo Schwartz 
  * Data: 21/08/2018
  * */
 import java.io.*;
