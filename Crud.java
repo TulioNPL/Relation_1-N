@@ -3,7 +3,6 @@
  * Data: 21/08/2018
  * */
 
-
 import java.io.*;
 import java.util.Scanner;
 
@@ -48,11 +47,16 @@ public class Crud {
 								choice = -1;
 								break;
 							case 1:
-								Filme filme = criarObjetoFilme();
-								System.out.println("CRIADO O FILME = "+filme.getTitulo());
+								boolean temGenero = hasGen();
+								if(temGenero) {
+									Filme filme = criarObjetoFilme();
+									System.out.println("CRIADO O FILME = "+filme.getTitulo());
 
-								if(filme != null) {
-									create(filme,-1);
+									if(filme != null) {
+										create(filme,-1);
+									} 
+								} else {
+									System.out.println("Não há generos cadastrados. Cadastre pelo menos 1 genero!");
 								}
 
 								break;
@@ -564,7 +568,7 @@ public class Crud {
 
 		System.out.print("Minutos filme: ");
 		min = input.nextShort();
-		
+
 		while(!existe) {
 			System.out.print("Digite o ID do genero: ");
 			idGen = input.nextInt();
@@ -609,4 +613,28 @@ public class Crud {
 		}
 		return address;
 	}//end searchIndex()
+
+	/**
+	 * Pesquisa a existencia de pelo menos 1 genero valido
+	 * @return true se existir pelo menos 1 genero valido ou false se nao existir nenhum
+	 * */
+	public static boolean hasGen() {
+		boolean resp = false;
+
+		try{
+			gen.seek(4);
+			while(gen.getFilePointer() < gen.length() && !resp) {
+				char auxC = gen.readChar();
+				short tam = gen.readShort();
+				gen.skipBytes(tam);
+				if(auxC != '*') {
+					resp = true;
+				}
+			}
+		} catch(IOException e) {
+			e.printStackTrace();
+		}
+
+		return resp;
+	}//end hasGen()
 }//end Crud
