@@ -17,7 +17,7 @@ public class Filme {
 	public Filme() {
 	}//end Filme()
 
-	/*
+	/**
 	 * Construtor da classe
 	 * @param titulo do filme
 	 * @param titulo Original do filme
@@ -111,7 +111,7 @@ public class Filme {
 		return this.idGenero;
 	}
 
-	/*
+	/**
 	 * Retorna um vetor de bytes(registro) do Filme corrente
 	 * @return vetor de bytes do registro
 	 * @throws IOException
@@ -134,7 +134,7 @@ public class Filme {
 		return dados.toByteArray();
 	}//end getByteArray()
 
-	/*
+	/**
 	 * Recebe um vetor de bytes com informacoes de um filme e seta no Filme corrente
 	 * @param vetor de bytes com informacoes de um filme do arquivo
 	 * @throws IOException
@@ -155,7 +155,7 @@ public class Filme {
 		
 	}//end setByteArray()
 
-	/*
+	/**
 	 * Escreve o objeto filme no arquivo
 	 * @param Instancia de RAF com o arquivo aberto
 	 * @throws IOException
@@ -167,7 +167,7 @@ public class Filme {
 		raf.write(dados);
 	}//end writeObject()
 
-	/*
+	/**
 	 * Retorna uma String com as informacoes do filme
 	 * @return Classe corrente em formato de string
 	 * */
