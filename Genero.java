@@ -8,13 +8,15 @@ public class Genero {
 	public Genero() {
 	}//end Genero()
 
-	/*
+	/**
 	 * Construtor da classe
 	 * @param nome do genero
+	 * @param id do genero
 	 * @return Instancia de genero criada com parametros selecionados
 	 * */
-	public Genero(String nomeGenero) {
+	public Genero(String nomeGenero, int idGenero) {
 		this.nomeGenero = nomeGenero;
+		this.idGenero = idGenero;
 	}//end Genero()
 
 	public void setNomeGenero(String nomeGenero) {
@@ -58,4 +60,16 @@ public class Genero {
 		setNomeGenero(entrada.readUTF());
 
 	}//end setByteArray()
+
+	/**
+	 * Escreve os dados do genero no arquivo
+	 * @param RAF arquivo onde sera escrito 
+	 * @throws IOException
+	 * */
+	public void writeObject(RandomAccessFile gen) throws IOException {
+		byte[] dados = this.getByteArray();
+		gen.writeChar(' ');
+		gen.writeShort(dados.length);
+		gen.write(dados);
+	}
 }//end Genero
