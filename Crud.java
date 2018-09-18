@@ -126,7 +126,7 @@ public class Crud {
 		System.out.println("Obrigado por utilizar o CRUD!");
 	}//end main()
 
-	/*
+	/**
 	 * Cria o genero
 	 * @param id do genero a ser criado
 	 * @param nome do genero a ser criado
@@ -151,17 +151,16 @@ public class Crud {
 				}
 				gen.seek(0);
 				gen.writeInt(idGen);
+				Genero novoGen = new Genero(genero,idGen);
 				gen.seek(gen.length());
-				gen.writeInt(idGen);
-				gen.writeChar(' ');
-				gen.writeUTF(genero);	
+				novoGen.writeObject(gen);	
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}//end createGen()
 
-	/*
+	/**
 	 * Altera um genero existente
 	 * */
 	public static void updateGen() {
@@ -170,25 +169,15 @@ public class Crud {
 		System.out.print("Digite o ID do genero a ser alterado: ");
 		int idGen = input.nextInt();
 		int id = -1;
-		long ponteiro = 0;
+		long ponteiro = searchGenPointer(idGen);
 
 		try {
-			gen.seek(4);
-			while(gen.getFilePointer() < gen.length() && continuar) {
-				int aux = gen.readInt();
-				ponteiro = gen.getFilePointer();
-				char auxC = gen.readChar();
-				if(idGen == aux && auxC != '*') {
-					continuar = false;
-					id = aux;
-				}	
-			}
-			if(!continuar) {
+			if(ponteiro != -1) {
 				gen.seek(ponteiro);
 				gen.writeChar('*');
-				createGen(id);		
+				createGen(idGen);
 			} else {
-				System.out.println("Genero nao existente na base de dados!");
+				System.out.println("Genero inexistente!");
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -196,7 +185,7 @@ public class Crud {
 
 	}//end updateGen()
 
-	/*
+	/**
 	 * Deleta um genero existente
 	 * */
 	public static void deleteGen() {
@@ -204,22 +193,16 @@ public class Crud {
 		System.out.print("Digite o ID do genero a ser excluido: ");
 		int idGen = input.nextInt();
 		boolean continuar = isEmpty(idGen);
+		long ponteiro = searchGenPointer(idGen);
 
 		if(continuar) {
 			try {
-				gen.seek(4);
-				while(gen.getFilePointer() < gen.length() && continuar) {
-					long ponteiro = gen.getFilePointer();
-					int auxID = gen.readInt();
-					char aux = gen.readChar();
-
-					if(auxID == idGen && aux != '*') {
-						continuar = false;
-						gen.seek(ponteiro);
-						gen.readInt();
-						gen.writeChar('*');
-					}
-				}	
+				if(ponteiro != -1) {
+					gen.seek(ponteiro);
+					gen.writeChar('*');
+				} else {
+					System.out.println("Genero inexsitente");
+				}
 			} catch(IOException e) {
 				e.printStackTrace();
 			}
@@ -228,33 +211,29 @@ public class Crud {
 		}
 	}//end deleteGen()
 
-	/*
+	/**
 	 * Consulta a existencia de um genero
 	 * */
 	public static void readGen(){
 		input = new Scanner(System.in);
 		System.out.print("Digite o ID genero que deseja procurar: ");
 		int idGen = input.nextInt();
-		boolean continuar = true;
-		int idLido = 0;
-		String genLido = "";
+		long ponteiro = searchGenPointer(idGen);
 
 		try {
-			gen.seek(4);
-			while(gen.getFilePointer() < gen.length() && continuar) {
-				idLido = gen.readInt();
-				char aux = gen.readChar();
-				genLido = gen.readUTF();
-				if(idGen == idLido && aux != '*')  {
-					continuar = false;
-				}
-			}
+			if(ponteiro != -1) {
+				gen.seek(ponteiro);
+				gen.readChar();
+				short tam = gen.readShort();
+				byte[] dados = new byte[tam];
+				gen.read(dados);
+				Genero genero = new Genero();
+				genero.setByteArray(dados);
 
-			if(!continuar) {
-				System.out.println("O genero procurado eh: " + genLido);
-				listaFilmes(idLido);
+				System.out.println("O genero procurado é: " + genero.getNomeGenero());
+				listaFilmes(genero.getID());
 			} else {
-				System.out.println("Genero nao encontrado!");
+				System.out.println("Genero inexistente!");
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -262,7 +241,41 @@ public class Crud {
 
 	}//end readGen()
 
-	/*
+	/**
+	 * Procura o ponteiro do genero escolhido
+	 * @param id do genero a ser procurado
+	 * @return ponteiro para a posicao do genero no arquivo
+	 * */
+	public static long searchGenPointer(int id) {
+		int idLido;
+		long address = -1;
+		boolean continuar = true;
+
+		try{
+			gen.seek(4);
+			while(gen.getFilePointer() < gen.length() && continuar) {
+				long auxPointer = gen.getFilePointer();
+				char aux = gen.readChar();
+				short tam = gen.readShort();
+				byte[] dados = new byte[tam];
+				gen.read(dados);
+				Genero genero = new Genero();
+				genero.setByteArray(dados);
+
+				if(aux != '*' && genero.getID() == id) {
+					address = auxPointer;
+					continuar = false;
+				}
+
+			}	
+		} catch(IOException e) {
+			e.printStackTrace();
+		}	
+
+		return address;
+	}//end searchGenPointer()
+
+	/**
 	 * Lista os filmes de um genero
 	 * @param ID do genero desejado
 	 * */
@@ -294,7 +307,7 @@ public class Crud {
 		}
 	}//end listaFilmes()
 
-	/*
+	/**
 	 * Confere se um genero possui filmes cadastrados
 	 * @param ID do genero desejado
 	 * @return true se existir filmes e false se nao existir
@@ -323,7 +336,7 @@ public class Crud {
 		return resp;
 	}//end isEmpty()
 
-	/*
+	/**
 	 * Procura a existencia do genero
 	 * @param genero a ser pesquisado
 	 * @return true se ja existir ou false se nao existir
@@ -334,9 +347,13 @@ public class Crud {
 		try {
 			gen.seek(4);
 			while(gen.getFilePointer() < gen.length() && !resp) {
-				gen.readInt();
 				char aux = gen.readChar();
-				if(genero.equals(gen.readUTF()) && aux != '*') {
+				short tam = gen.readShort();
+				byte[] dados = new byte[tam];
+				gen.read(dados);
+				Genero novoGen = new Genero();
+				novoGen.setByteArray(dados);
+				if(genero.equals(novoGen.getNomeGenero()) && aux != '*') {
 					resp = true;
 				}
 			}
@@ -347,22 +364,25 @@ public class Crud {
 		return resp;
 	}//end searchGen()
 
-	/*
+	/**
 	 * Procura a existencia do genero pelo ID
 	 * @param ID do genero a ser pesquisado
-	 * @return o nome do genero se existir e vazio se nao existir
+	 * @return true se existir genero com esse ID e false se nao existir
 	 * */
-	public static String searchGen(int genero) {
-		String nomeGen = "";
+	public static boolean searchGen(int genero) {
 		boolean resp = false;
+		Genero novoGen = new Genero();
 
 		try {
 			gen.seek(4);
 			while(gen.getFilePointer() < gen.length() && !resp) {
-				int auxID = gen.readInt();
 				char auxC = gen.readChar();
-				nomeGen = gen.readUTF();
-				if(auxID == genero) {
+				short tam = gen.readShort();
+				byte[] dados = new byte[tam];
+				gen.read(dados);
+				novoGen.setByteArray(dados);
+
+				if(novoGen.getID() == genero && auxC != '*') {
 					resp = true;
 				}
 			}
@@ -371,16 +391,14 @@ public class Crud {
 		}
 
 		if(resp) {
-			System.out.println("Genero escolhido: " + nomeGen);
-		} else {
-			nomeGen = "";
+			System.out.println("Genero escolhido: " + novoGen.getNomeGenero());
 		}
 
-		return nomeGen;
+		return resp;
 	}//end searchGen()
 
 
-	/*
+	/**
 	 * Escreve o filme no arquivo
 	 * @param uma instancia de filme a ser gravada
 	 * @param id do filme a ser gravado
@@ -409,7 +427,7 @@ public class Crud {
 		}	
 	}//end create()
 
-	/*
+	/**
 	 * Deleta o filme do arquivo(alterando a lapide
 	 * @param id do filme a ser deletado
 	 * */
@@ -428,7 +446,7 @@ public class Crud {
 			System.out.println("Filme não encontrado!");
 	}//end delete()
 
-	/*
+	/**
 	 * Altera as informacoes do filme selecionado
 	 * @param id do filme a ser alterado
 	 * */
@@ -451,7 +469,7 @@ public class Crud {
 
 	}//end update()
 
-	/*
+	/**
 	 * Pesquisa as informacoes de um filme no arquivo
 	 * @param id do filme a ser pesquisado
 	 * */
@@ -486,7 +504,7 @@ public class Crud {
 		} 		
 	}//end read()
 
-	/*
+	/**
 	 * Encontra o ponteiro do inicio de um registro
 	 * @param id do registro cujo ponteiro eh desejado
 	 * @return ponteiro do registro desejado
@@ -512,14 +530,14 @@ public class Crud {
 		return address;
 	}//end searchPointer()
 
-	/*
+	/**
 	 * Cria um objeto de filme com as informacoes da entrada
 	 * @return uma instancia de Filme criada
 	 * */
 	public static Filme criarObjetoFilme(){
 		Scanner input = new Scanner(System.in);
 		String titulo,tituloOriginal,pais,diretor,sinopse;
-		String genero = "";
+		boolean existe = false;
 		int idGen = -1;
 		short ano;
 		short min;
@@ -547,11 +565,11 @@ public class Crud {
 		System.out.print("Minutos filme: ");
 		min = input.nextShort();
 		
-		while(genero.equals("")) {
+		while(!existe) {
 			System.out.print("Digite o ID do genero: ");
 			idGen = input.nextInt();
-			genero = searchGen(idGen);
-			if(genero.equals("")) {
+			existe = searchGen(idGen);
+			if(!existe) {
 				System.out.println("ID inexistente!");
 			}
 		}
@@ -565,7 +583,7 @@ public class Crud {
 		return filme; 
 	}//end criarObjetoFilme()
 
-	/*
+	/**
 	 * Procura o endereco do filme no indice
 	 * @param id do filme a ser procurado
 	 * @return posicao do registro no arquivo
