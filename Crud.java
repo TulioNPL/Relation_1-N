@@ -1,7 +1,7 @@
-/*
- * Autores: Tulio N. Polido Lopes, Joao Victor da Silva, Gustavo Lescowicz Kotarsky, Temistocles Altivo Schwartz
- * Data: 21/08/2018
- * */
+/**
+ * CRUD de filmes e generos de filmes
+ * @author Tulio N. Polido Lopes - Github: TulioNPL
+ **/
 
 import java.io.*;
 import java.util.Scanner;
@@ -314,7 +314,7 @@ public class Crud {
 	/**
 	 * Confere se um genero possui filmes cadastrados
 	 * @param ID do genero desejado
-	 * @return true se existir filmes e false se nao existir
+	 * @return <code>true</code> se existir filmes e false se nao existir
 	 * */
 	private static boolean isEmpty(int idGen) {
 		boolean resp = true;

@@ -1,7 +1,7 @@
-/*:
- * Autores: Tulio N. Polido Lopes, Joao Victor da Silva, Gustavo Lescowicz Kotarsky, Temistocles Altivo Schwartz 
- * Data: 21/08/2018
- * */
+/**
+ * Classe para gerenciamento de filmes
+ * @author: Tulio N. Polido Lopes - Github: TulioNPL 
+ **/
 import java.io.*;
 
 public class Filme {

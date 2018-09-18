@@ -1,6 +1,10 @@
+/**
+ * Classe para gerenciamento de generos
+ * @author Github: RaphaelAGN
+ */
+
 import java.io.*;
 
-//Classe construtora dos generos
 public class Genero {
 	private int idGenero;
 	private String nomeGenero;
